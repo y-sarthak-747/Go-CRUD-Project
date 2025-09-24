@@ -145,3 +145,130 @@ Think of it like a hexagon socket wrench — the inside shape is always the same
   - I personally used ChatGPT extensively while building this project.  
   - It helped me understand tricky Go concepts, hexagonal architecture details, and best practices.  
   - Don’t hesitate — treat it like your coding buddy. 🚀  
+
+
+---
+
+
+## ⚙️ Project Setup
+
+To run this project, you need Go installed (1.20+ recommended).  
+Use the following commands during development:
+
+- Run the application: `go run main.go`  
+- Build the application: `go build main.go`  
+- Download dependencies: `go mod tidy`  
+- Run a single file (example): `go run hello.go`  
+
+Always run `go mod tidy` after adding new dependencies so your `go.mod` and `go.sum` stay clean.
+
+---
+
+## 📦 Dependencies
+
+These are the main dependencies required for this project:
+
+- Gin (HTTP framework): `go get github.com/gin-gonic/gin`  
+- GORM (ORM for Postgres): `go get gorm.io/gorm` and `go get gorm.io/driver/postgres`  
+- Go-Redis (Redis client): `go get github.com/redis/go-redis/v9`  
+- Prometheus client for Go: `go get github.com/prometheus/client_golang/prometheus` and `go get github.com/prometheus/client_golang/prometheus/promhttp`  
+- Sarama (Kafka client for Go): `go get github.com/IBM/sarama`  
+
+---
+
+## 📡 APIs (curl examples)
+
+1. Create Student  
+   curl -X POST http://localhost:8080/students \
+   -H "Content-Type: application/json" \
+   -d '{"name":"Alice","number":"1234"}'
+
+2. Get Student by ID  
+   curl -X GET http://localhost:8080/students/1
+
+3. Create Teacher  
+   curl -X POST http://localhost:8080/teachers \
+   -H "Content-Type: application/json" \
+   -d '{"name":"Mr. Smith","subject":"Math"}'
+
+4. Get Teacher by ID  
+   curl -X GET http://localhost:8080/teachers/1
+
+5. Teacher Sends Notification to Student  
+   curl -X POST http://localhost:8080/teachers/send \
+   -H "Content-Type: application/json" \
+   -d '{"student_id": 1, "teacher_id": 2, "message": "Don’t forget your math homework!"}'
+
+
+---
+
+
+## 🗄️ Database Schemas
+
+The following tables are created in Postgres:
+
+1. **students**  
+   - id (serial primary key)  
+   - name (text)  
+   - number (text)  
+
+2. **teachers**  
+   - id (serial primary key)  
+   - name (text)  
+   - subject (text)  
+
+3. **student_teacher_notifications**  
+   - id (serial primary key)  
+   - student_id (int, foreign key to students.id)  
+   - teacher_id (int, foreign key to teachers.id)  
+   - message (text)  
+   - created_at (timestamp)  
+
+### SQL Queries to Create Tables
+
+CREATE TABLE students (  
+    id SERIAL PRIMARY KEY,  
+    name TEXT NOT NULL,  
+    number TEXT NOT NULL  
+);
+
+CREATE TABLE teachers (  
+    id SERIAL PRIMARY KEY,  
+    name TEXT NOT NULL,  
+    subject TEXT NOT NULL  
+);
+
+CREATE TABLE student_teacher_notifications (  
+    id SERIAL PRIMARY KEY,  
+    student_id INT NOT NULL REFERENCES students(id),  
+    teacher_id INT NOT NULL REFERENCES teachers(id),  
+    message TEXT NOT NULL,  
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
+);
+
+## 📩 Kafka
+
+- Kafka Topic used: student_notifications  
+- Teachers publish messages to this topic.  
+- The Kafka consumer listens to this topic, processes events, and saves them into the student_teacher_notifications table.
+
+
+---
+
+
+## 🐳 Running with Docker Compose (Optional)
+
+This project also includes a docker-compose.yml file that sets up all the required infrastructure services:
+
+- Postgres (for Student/Teacher/Notification tables)  
+- Redis (for caching)  
+- Kafka + Zookeeper (for event-driven messaging)  
+- Prometheus (for metrics scraping)  
+
+If you don’t want to install these tools manually on your system, you can simply run:
+
+docker compose up -d
+
+This will start all the containers in the background. Your Go service can then connect to Postgres, Redis, and Kafka running inside Docker. Prometheus will also be available to scrape metrics.
+
+👉 This step is optional. If you already have Postgres, Redis, or Kafka installed locally, you can use your own setup. If you don’t, docker compose up is the quickest way to get started.
