@@ -9,17 +9,47 @@ import (
 )
 
 func RegisterRoutes(r *gin.Engine) {
-	// Setup repository + service + controller
-	repo := repository.NewStudentRepository()
-	service := services.NewStudentService(repo)
-	controller := controllers.NewStudentController(service)
+    // === Student Setup ===
+    studentRepo := repository.NewPostgresStudentRepository()
+    studentService := services.NewStudentService(studentRepo)
+    studentController := controllers.NewStudentController(studentService)
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "pong"})
-	})
+    studentRoutes := r.Group("/students")
+    {
+        studentRoutes.POST("", studentController.CreateStudent)
+        studentRoutes.GET("", studentController.GetStudents)
+        studentRoutes.PUT("/:id", studentController.UpdateStudent)
+        studentRoutes.DELETE("/:id", studentController.DeleteStudent)
+    }
 
-	r.POST("/students", controller.CreateStudent)
-	r.GET("/students", controller.GetStudents)
-	r.PUT("/students/:id", controller.UpdateStudent)
-	r.DELETE("/students/:id", controller.DeleteStudent)
+    // === Teacher Setup ===
+    teacherRepo := repository.NewPostgresTeacherRepository()
+    teacherService := services.NewTeacherService(teacherRepo)
+    teacherController := controllers.NewTeacherController(teacherService)
+
+    teacherRoutes := r.Group("/teachers")
+    {
+        teacherRoutes.POST("", teacherController.CreateTeacher)
+        teacherRoutes.GET("", teacherController.GetTeachers)
+        teacherRoutes.PUT("/:id", teacherController.UpdateTeacher)
+        teacherRoutes.DELETE("/:id", teacherController.DeleteTeacher)
+    }
 }
+
+/*
+Student APIs
+
+POST /students
+GET /students
+PUT /students/:id
+DELETE /students/:id
+
+
+
+Teacher APIs
+
+POST /teachers
+GET /teachers
+PUT /teachers/:id
+DELETE /teachers/:id
+*/

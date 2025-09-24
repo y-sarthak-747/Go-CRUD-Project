@@ -7,7 +7,7 @@ import (
 
 type StudentRepository struct{}
 
-func NewStudentRepository() *StudentRepository {
+func NewPostgresStudentRepository() *StudentRepository {
 	return &StudentRepository{}
 }
 
