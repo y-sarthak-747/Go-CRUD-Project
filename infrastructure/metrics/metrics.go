@@ -26,6 +26,23 @@ var (
 		},
 		[]string{"method", "path"},
 	)
+
+	StudentCacheHits = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "student_cache_hits_total",
+			Help: "Total number of student cache hits",
+		},
+		[]string{"operation"},
+	)
+
+	// Cache Misses
+	StudentCacheMisses = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "student_cache_misses_total",
+			Help: "Total number of student cache misses",
+		},
+		[]string{"operation"},
+	)
 )
 
 // Expose /metrics endpoint
