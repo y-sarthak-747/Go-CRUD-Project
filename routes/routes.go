@@ -10,9 +10,12 @@ import (
 
 func RegisterRoutes(r *gin.Engine) {
     // === Student Setup ===
-    studentRepo := repository.NewPostgresStudentRepository()
-    studentService := services.NewStudentService(studentRepo)
-    studentController := controllers.NewStudentController(studentService)
+    dbRepo := repository.NewPostgresStudentRepository()
+	redisRepo := repository.NewStudentRedisRepository()
+	hybridRepo := repository.NewStudentHybridRepository(dbRepo, redisRepo)
+
+	studentService := services.NewStudentService(hybridRepo)
+	studentController := controllers.NewStudentController(studentService)
 
     studentRoutes := r.Group("/students")
     {

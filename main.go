@@ -17,6 +17,8 @@ func main() {
 
 	config.ConnectDatabase()
 
+	config.ConnectRedis()
+
 	routes.RegisterRoutes(r)
 
 	metrics.RegisterMetricsEndpoint()
