@@ -36,6 +36,7 @@ func RegisterRoutes(r *gin.Engine) {
         teacherRoutes.GET("", teacherController.GetTeachers)
         teacherRoutes.PUT("/:id", teacherController.UpdateTeacher)
         teacherRoutes.DELETE("/:id", teacherController.DeleteTeacher)
+		teacherRoutes.POST("/send", teacherController.SendMessageToStudent)
     }
 }
 

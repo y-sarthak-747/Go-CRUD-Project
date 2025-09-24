@@ -1,6 +1,7 @@
 package main
 
 import (
+	"student-crud/bootstrap"
 	"student-crud/config"
 	"student-crud/routes"
 
@@ -11,17 +12,23 @@ import (
 )
 
 func main() {
-	r := gin.Default()
+    r := gin.Default()
+    r.Use(middleware.PrometheusMiddleware())
 
-	r.Use(middleware.PrometheusMiddleware())
+    // 1. Infrastructure
+    config.ConnectDatabase()
+    config.ConnectRedis()
+    config.InitKafkaProducer()
 
-	config.ConnectDatabase()
+    // 2. Routes (HTTP)
+    routes.RegisterRoutes(r)
 
-	config.ConnectRedis()
+    // 3. Metrics
+    metrics.RegisterMetricsEndpoint()
 
-	routes.RegisterRoutes(r)
+    // 4. Background consumers
+    bootstrap.InitKafkaConsumers()
 
-	metrics.RegisterMetricsEndpoint()
-
-	r.Run(":8080")
+    // 5. Start API
+    r.Run(":8080")
 }

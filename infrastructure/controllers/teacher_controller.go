@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"student-crud/application/services"
+	"student-crud/domain/events"
 	"student-crud/domain/models"
+	"student-crud/infrastructure/kafka"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,4 +69,20 @@ func (ctrl *TeacherController) DeleteTeacher(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+}
+
+func (ctrl *TeacherController) SendMessageToStudent(c *gin.Context) {
+	var req events.NotificationEvent
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	payload, _ := json.Marshal(req)
+	if err := kafka.SendMessage("student_notifications", payload); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to send message"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "message sent"})
 }
